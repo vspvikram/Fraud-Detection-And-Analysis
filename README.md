@@ -9,6 +9,4 @@ we will be exploring a dataset of credit card transactions that has been modifie
 
 The "time" feature represents the number of seconds that have elapsed between each transaction and the first transaction in the dataset. The "amount" feature, on the other hand, represents the monetary value of the transaction.
 
-The response variable, or the variable we are interested in predicting, is called "Class" and it takes on a value of 1 if the transaction is a fraud transaction, and 0 if it is not. We will be using this variable to train and evaluate our models.
-
-Data source: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+The response variable, or the variable we are interested in predicting, is called "Class" and it takes on a value of 1 if the transaction is a fraud transaction, and 0 if it is not. We will be using this variable to train and evaluate our models. The data source can be found in the [Link](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
