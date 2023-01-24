@@ -39,6 +39,7 @@ training_path = os.path.join(input_path, training_channel_name)
 inference_channel_name = "inference"
 inference_path = os.path.join(input_path, inference_channel_name)
 
+
 def train():
     print("[Training] Starting...")
     # # environment variables
@@ -53,19 +54,19 @@ def train():
     # AMOUNT_SCALER_PATH = os.path.join(MODEL_DIR, AMOUNT_SCALER)
     try:
         # loading the training files
-        data = pd.read_csv(os.path.join(training_path, "train.csv"))
+        data = pd.read_csv(os.path.join(training_path, "train.csv"), header=None)
         data = data.sample(frac=1)
 
         # data preprocessing
         time_scaler = RobustScaler()
         amount_scaler = RobustScaler()
 
-        data[["Amount"]] = amount_scaler.fit_transform(data[["Amount"]])
-        data[["Time"]] = time_scaler.fit_transform(data[["Time"]])
+        data.iloc[:, 2] = amount_scaler.fit_transform(data.iloc[:, 2:3])
+        data.iloc[:, 1] = time_scaler.fit_transform(data.iloc[:, 1:2])
         data = data.reset_index(drop=True)
 
-        X = data.drop(["Class"], axis=1)
-        y = data["Class"]
+        X = data.drop(data.columns[[0]], axis=1)
+        y = data.iloc[:,0]
         print("Number of training set samples for each class before oversampling:")
         print(y.value_counts())
 
@@ -76,8 +77,10 @@ def train():
         print(y.value_counts())
 
         # for XGBoost classifier
-        xgb_clf = XGBClassifier(max_depth = 10, learning_rate=0.3,
+        xgb_clf = XGBClassifier(max_depth = 3, learning_rate=0.3,
                             n_estimators = 100)
+        # xgb_clf = XGBClassifier(max_depth = 2, learning_rate=0.3,
+        #                     n_estimators = 10)
         
         xgb_clf = xgb_clf.fit(X, y)
 
@@ -96,9 +99,9 @@ def train():
         # Saving the model files
         with open(os.path.join(model_path, 'xgboost-model.pkl'), 'wb') as m_out:
             pickle.dump(xgb_clf, m_out, protocol=0)
-        with open(os.path.join(model_path, 'time-scaler.pkl'), 'wb') as time_out:
+        with open(os.path.join(scalers_path, 'time-scaler.pkl'), 'wb') as time_out:
             pickle.dump(time_scaler, time_out, protocol=0)
-        with open(os.path.join(model_path, 'amount-scaler.pkl'), 'wb') as amount_out:
+        with open(os.path.join(scalers_path, 'amount-scaler.pkl'), 'wb') as amount_out:
             pickle.dump(amount_scaler, amount_out, protocol=0)
         
         print("[Training] Finished.")
@@ -106,8 +109,8 @@ def train():
     except Exception as e:
         # write the error in the output folder
         trc = traceback.format_exc()
-        with open(os.path.join(output_path, 'failure'), 'w') as fail:
-            fail.write("Exception happened during training: " + str(e) + '\n' + trc)
+        # with open(os.path.join(output_path, 'failure'), 'w') as fail:
+        #     fail.write("Exception happened during training: " + str(e) + '\n' + trc)
 
         print("Exception occured: " + str(e) + '\n' + trc, file=sys.stderr)
         sys.exit(255) # exit code to mark the training job as failed.

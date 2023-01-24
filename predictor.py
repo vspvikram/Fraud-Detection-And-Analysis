@@ -53,7 +53,7 @@ class ScoringService(object):
     def get_amount_scaler(cls):
         """load the amount scaler if not already loaded"""
         if cls.amount_scaler == None:
-            with open(os.path.join(model_path, "amount-scaler.pkl"), 'rb') as a_file:
+            with open(os.path.join(scalers_path, "amount-scaler.pkl"), 'rb') as a_file:
                 cls.amount_scaler = pickle.load(a_file)
 
         return cls.amount_scaler
@@ -65,8 +65,8 @@ class ScoringService(object):
         if len(data.columns) != 30:
             return -1
 
-        data[:, 0] = time_scaler.transform(data[:, 0])
-        data[:, 1] = amount_scaler.transform(data[:, 1])
+        data.iloc[:, 0] = time_scaler.transform(data.iloc[:, 0:1])
+        data.iloc[:, 1] = amount_scaler.transform(data.iloc[:, 1:2])
 
         return data
 
@@ -104,11 +104,11 @@ def transformation():
     data = None 
 
     # convert from csv to pandas dataframe
-    if flask.request.content_type == 'test/csv':
+    if flask.request.content_type == 'text/csv':
         data = flask.request.data.decode('utf-8')
         s = StringIO(data)
         data = pd.read_csv(s, header=None)
-        data = data.ix[:, 1:]
+        data = data.iloc[:, 1:]
 
     else:
         return flask.Response(response="This predictor only supports CSV data", status=415,
@@ -116,7 +116,7 @@ def transformation():
 
     # transform the data for time and amount features scaling
     data = ScoringService.transform_data(data)
-    if data == -1:
+    if not isinstance(data, pd.DataFrame):
         return flask.Response(response="Please provide the correct column format for the data", 
                                 status=415, mimetype="text/plain")
 
