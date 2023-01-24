@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# train.py
+# Vikram Singh 01/22/2023
+
+# Environment info
+import platform; print(platform.platform())
+import numpy; print("Numpy", numpy.__version__)
+import sys; print("Python", sys.version)
+
+# Basic libraries
+import pandas as pd
+import os
+from joblib import dump, load
+import pickle
+
+# Classifiers
+from xgboost import XGBClassifier
+
+# Others
+from sklearn.preprocessing import RobustScaler
+from imblearn.over_sampling import SMOTE
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
+import traceback
+import warnings
+warnings.filterwarnings("ignore")
+
+# paths of various files in the container
+prefix = '/opt/ml/'
+
+input_path = prefix + 'input/data'
+output_path = os.path.join(prefix, 'output')
+model_path = os.path.join(prefix, 'model')
+scalers_path = os.path.join(prefix, 'scalers')
+
+# two channels for the input data
+training_channel_name = "training"
+training_path = os.path.join(input_path, training_channel_name)
+
+inference_channel_name = "inference"
+inference_path = os.path.join(input_path, inference_channel_name)
+
+def train():
+    print("[Training] Starting...")
+    # # environment variables
+    # MODEL_DIR = os.environ["MODEL_DIR"]
+    # MODEL_FILE = os.environ["MODEL_FILE"]
+    # MODEL_FILE_PATH = os.path.join(MODEL_DIR, MODEL_FILE)
+
+    # TIME_SCALER = os.environ["TIME_SCALER"]
+    # TIME_SCALER_PATH = os.path.join(MODEL_DIR, TIME_SCALER)
+
+    # AMOUNT_SCALER = os.environ["AMOUNT_SCALER"]
+    # AMOUNT_SCALER_PATH = os.path.join(MODEL_DIR, AMOUNT_SCALER)
+    try:
+        # loading the training files
+        data = pd.read_csv(os.path.join(training_path, "train.csv"))
+        data = data.sample(frac=1)
+
+        # data preprocessing
+        time_scaler = RobustScaler()
+        amount_scaler = RobustScaler()
+
+        data[["Amount"]] = amount_scaler.fit_transform(data[["Amount"]])
+        data[["Time"]] = time_scaler.fit_transform(data[["Time"]])
+        data = data.reset_index(drop=True)
+
+        X = data.drop(["Class"], axis=1)
+        y = data["Class"]
+        print("Number of training set samples for each class before oversampling:")
+        print(y.value_counts())
+
+        # Oversampling using SMOTE
+        oversample = SMOTE(sampling_strategy="minority")
+        X, y = oversample.fit_resample(X, y)
+        print("Number of training set samples for each class after oversampling:")
+        print(y.value_counts())
+
+        # for XGBoost classifier
+        xgb_clf = XGBClassifier(max_depth = 10, learning_rate=0.3,
+                            n_estimators = 100)
+        
+        xgb_clf = xgb_clf.fit(X, y)
+
+        preds = xgb_clf.predict(X)
+        preds_proba = xgb_clf.predict_proba(X)[:,1]
+        f1_score_ = f1_score(y, preds)
+        recall_ = recall_score(y, preds)
+        precesion_ = precision_score(y, preds)
+        auc_score_ = roc_auc_score(y, preds_proba)
+
+        print("Training Recall: {}".format(recall_))
+        print("Training Precision: {}".format(precesion_))
+        print("Training f1_score: {}".format(f1_score_))
+        print("Training roc auc score: {}".format(auc_score_))
+
+        # Saving the model files
+        with open(os.path.join(model_path, 'xgboost-model.pkl'), 'wb') as m_out:
+            pickle.dump(xgb_clf, m_out, protocol=0)
+        with open(os.path.join(model_path, 'time-scaler.pkl'), 'wb') as time_out:
+            pickle.dump(time_scaler, time_out, protocol=0)
+        with open(os.path.join(model_path, 'amount-scaler.pkl'), 'wb') as amount_out:
+            pickle.dump(amount_scaler, amount_out, protocol=0)
+        
+        print("[Training] Finished.")
+
+    except Exception as e:
+        # write the error in the output folder
+        trc = traceback.format_exc()
+        with open(os.path.join(output_path, 'failure'), 'w') as fail:
+            fail.write("Exception happened during training: " + str(e) + '\n' + trc)
+
+        print("Exception occured: " + str(e) + '\n' + trc, file=sys.stderr)
+        sys.exit(255) # exit code to mark the training job as failed.
+
+if __name__ == "__main__":
+    train()
+
+    # marking the job as success with the below exit code
+    sys.exit(0)
