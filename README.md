@@ -23,6 +23,7 @@ As a result, we chose the XGBoost Classifier to include in a Docker container an
 # Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
+
 ## Installing Docker and testing locally:
 1. Clone the repository to your local machine by
 
@@ -52,15 +53,30 @@ docker run --rm -v "$(pwd)/test_dir:/opt/ml" fraud-detect train
 
 ## Deploying on Sagemaker using Amazon Elastic Container Registry (ECR):
 
-1. Go to your AWS dashboard and create an ECR repository. 
+1. Go to your AWS dashboard and create an ECR repository with your choice of name (e.g. fraud-detect)
+
 2. On your local machine install and authenticate Amazon command line interface (CLI) using these links: [CLI Installation](https://github.com/tchapi/markdown-cheatsheet/blob/master/README.md) and [CLI Authentication](https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html#registry_auth).
+
 3. Now login to your AWS account in the CLI using
 ```bash
 aws ecr get-login-password --region <region name> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region name>.amazonaws.com
 ```
-4. Now, go to AWS sagemaker and create a new sagemaker notebook. Once notebook is ready, click on ```open jupyter``` to start the jupyter notebook session. Upload the sagemaker notebook ```sagemaker_notebook_fraud_detection.ipynb``` from this repository to the AWS sagemaker jupyter session.
-5. Select the container image in the notebook that was pushed to ECR. Run the notebook to train and deploy the model by creating an endpoint.
-6. Delete the endpoint by running the last cell in the notebook when you are done to avoid being charged by AWS.
+
+4. Go to your ECR respoitory and click on "View push commands". Use the third command to tag your image so you can push the image to this repository:
+```bash
+docker tag fraud-detect:latest <account id>.dkr.ecr.<region name>.amazonaws.com/fraud-detect:latest
+```
+
+5. Use the fourth command to push the image from local machine to ECR.
+```bash
+docker push <account id>.dkr.ecr.,region name>.amazonaws.com/fraud-detect:latest
+```
+
+6. Now, go to AWS sagemaker and create a new sagemaker notebook. Once notebook is ready, click on ```open jupyter``` to start the jupyter notebook session. Upload the sagemaker notebook ```sagemaker_notebook_fraud_detection.ipynb``` from this repository to the AWS sagemaker jupyter session.
+
+7. Select the container image in the notebook that was pushed to ECR. Run the notebook to train and deploy the model by creating an endpoint.
+
+8. Delete the endpoint by running the last cell in the notebook when you are done to avoid being charged by AWS.
 
 ## Authers:
 * Vikram Singh
