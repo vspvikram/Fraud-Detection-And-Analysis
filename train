@@ -33,10 +33,10 @@ model_path = os.path.join(prefix, 'model')
 scalers_path = os.path.join(prefix, 'scalers')
 
 # two channels for the input data
-training_channel_name = "training"
+training_channel_name = "train"
 training_path = os.path.join(input_path, training_channel_name)
 
-inference_channel_name = "inference"
+inference_channel_name = "validation"
 inference_path = os.path.join(input_path, inference_channel_name)
 
 
@@ -54,6 +54,12 @@ def train():
     # AMOUNT_SCALER_PATH = os.path.join(MODEL_DIR, AMOUNT_SCALER)
     try:
         # loading the training files
+        print("Here are the files in folder: /opt/ml")
+        print(os.listdir(prefix))
+        print("Here are the files in folder: /opt/ml/input/data")
+        print(os.listdir(input_path))
+        print("Here are the files in folder: /opt/ml/input/data/training")
+        print(os.listdir(training_path))
         data = pd.read_csv(os.path.join(training_path, "train.csv"), header=None)
         data = data.sample(frac=1)
 

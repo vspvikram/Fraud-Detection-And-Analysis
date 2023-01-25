@@ -29,10 +29,10 @@ model_path = os.path.join(prefix, 'model')
 scalers_path = os.path.join(prefix, 'scalers')
 
 # two channels for the input data
-training_channel_name = "training"
+training_channel_name = "train"
 training_path = os.path.join(input_path, training_channel_name)
 
-inference_channel_name = "inference"
+inference_channel_name = "validation"
 inference_path = os.path.join(input_path, inference_channel_name)
 
 class ScoringService(object):

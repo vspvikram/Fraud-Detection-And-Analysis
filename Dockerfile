@@ -1,4 +1,5 @@
-FROM python:3.9-slim
+FROM amd64/python:3.9-slim
+# FROM python:3.9-slim
 
 # installing the required packages
 RUN apt-get update && \
@@ -23,11 +24,14 @@ ENV PATH="/opt/program:${PATH}"
 RUN mkdir -p /opt/ml/model
 RUN mkdir -p /opt/ml/output
 RUN mkdir -p /opt/ml/scalers
+RUN mkdir -p /opt/ml/input/data
+RUN mkdir -p /opt/ml/input/data/train
+RUN mkdir -p /opt/ml/input/data/validation
 
 # copy the data files to the container
-COPY /data/train.csv /opt/ml/input/data/training/train.csv
-COPY /data/test.csv /opt/ml/input/data/inference/test.csv
-COPY /data/test_copy.csv /opt/ml/input/data/inference/test_small.csv
+COPY /data/train.csv /opt/ml/input/data/train/train.csv
+COPY /data/test.csv /opt/ml/input/data/validation/test.csv
+COPY /data/test_small.csv /opt/ml/input/data/validation/test_small.csv
 
 # copy the executable files
 COPY train /opt/program/train
@@ -38,3 +42,4 @@ COPY nginx.conf /opt/program/nginx.conf
 
 # defining the work directory for the container image
 WORKDIR /opt/program
+ENTRYPOINT ["python"]
