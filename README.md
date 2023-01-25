@@ -1,4 +1,4 @@
-# Fraud-Detection-And-Analysis
+# Fraud-Detection-ML-Docker-AWS-Sagemaker-Deployment
 
 This GitHub repository contains various machine learning models for analyzing and detecting fraudulent activity. The models include methods for identifying patterns and anomalies in financial transactions, as well as techniques for predicting the likelihood of fraud in new transactions. The repository includes python scripts for data analysis, model building, model evaluation and Docker containerization, as well as instructions for deploying the model on AWS SageMaker using ECR repository. It's useful for researchers, data scientists and engineers who are interested in developing and implementing fraud detection systems. Various techniques such as supervised and unsupervised have been used in this repository, allowing for a comprehensive analysis and detection of fraud cases.
 
@@ -18,6 +18,7 @@ We then evaluated various classification models for their performance in detecti
 ## Deployment:
 
 As a result, we chose the XGBoost Classifier to include in a Docker container and deploy it on AWS SageMaker. This allows us to easily deploy the model in a production environment and make predictions on new data.
+
 
 # Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
