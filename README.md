@@ -11,7 +11,7 @@ The response variable, or the variable we are interested in predicting, is calle
 
 ## Data Exploration and Model Building:
 
-The main issue with this dataset is that it is highly imbalanced, with a large majority of transactions being non-fraudulent. To address this issue, we used two techniques: under-sampling and over-sampling using the Synthetic Minority Over-sampling Technique (SMOTE) method. These techniques allowed us to balance the dataset and improve the performance of our models.
+[fraud_data_EDA_and_model_building.ipynb](https://github.com/vspvikram/Fraud-Detection-ML-Docker-AWS-Sagemaker-Deployment/blob/main/fraud_data_EDA_and_model_building.ipynb): The main issue with this dataset is that it is highly imbalanced, with a large majority of transactions being non-fraudulent. To address this issue, we used two techniques: under-sampling and over-sampling using the Synthetic Minority Over-sampling Technique (SMOTE) method. These techniques allowed us to balance the dataset and improve the performance of our models.
 
 We then evaluated various classification models for their performance in detecting fraudulent transactions using metrics such as F1-score, recall, precision, ROC AUC, and average precision. We found that the XGBoost and Logistic Regression models performed similarly and better than other models, but the XGBoost Classifier generalized the model learning slightly better than the Logistic Regression Classifier.
 
@@ -76,7 +76,9 @@ docker push <account id>.dkr.ecr.,region name>.amazonaws.com/fraud-detect:latest
 
 7. Select the container image in the notebook that was pushed to ECR. Run the notebook to train and deploy the model by creating an endpoint.
 
-8. Delete the endpoint by running the last cell in the notebook when you are done to avoid being charged by AWS.
+8. Next, AWS Lambda function can be configured to handle the API calls from the client and the sagemaker estimator end point. Please refer to AWS [docs](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-sagemaker-create-notebook/) and follow the guidelines to complete these steps.
+
+8. Delete the endpoint by running the last cell in the notebook when you are done to avoid being charged by AWS. 
 
 ## Authers:
 * Vikram Singh
